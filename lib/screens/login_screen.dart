@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:new_application_api/screens/forgot_screen.dart';
-import 'signup_screen.dart';
+import 'package:new_application_api/screens/home_screen.dart';
+import 'package:new_application_api/screens/signup_screen.dart';
+import 'package:new_application_api/services/auth_service.dart';
+import 'package:new_application_api/utils/user_session.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,6 +16,36 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   bool isPasswordHidden = true;
   bool isChecking = false;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  void _login() async {
+    try {
+      final loginResponse = await AuthService()
+          .login(_emailController.text, _passwordController.text);
+
+      if (!mounted) return;
+
+      if (loginResponse.token != null) {
+        UserSession.setSession(loginResponse.user!, loginResponse.token!);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of( context ).showSnackBar(
+        SnackBar(
+          content: Text("Error: ${e.toString()}"),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +60,7 @@ class LoginScreenState extends State<LoginScreen> {
               /// --- [Header] --- ///
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     "Login",
@@ -52,6 +86,7 @@ class LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Email
                   TextFormField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 20),
                       prefixIcon: Icon(Iconsax.direct_right,
@@ -72,6 +107,7 @@ class LoginScreenState extends State<LoginScreen> {
 
                   // Password
                   TextFormField(
+                    controller: _passwordController,
                     obscureText: isPasswordHidden,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 20),
@@ -147,7 +183,7 @@ class LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => _login(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,

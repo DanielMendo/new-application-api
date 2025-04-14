@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:new_application_api/services/auth_service.dart';
+import 'package:new_application_api/utils/user_session.dart';
+import 'package:new_application_api/screens/home_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -9,13 +12,55 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class SignUpScreenState extends State<SignUpScreen> {
+  
   bool isPasswordHidden = true;
   bool isChecking = false;
+  final _nameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  void _register() async {
+    try {
+      final registerResponse = await AuthService().register(
+        _nameController.text,
+        _lastNameController.text,
+        _phoneController.text,
+        _emailController.text,
+        _passwordController.text
+      );
+
+      if (!mounted) return;
+      
+      if (registerResponse.token != null) {
+        UserSession.setSession(registerResponse.user!, registerResponse.token!);
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+          (Route<dynamic> route) => false,
+        );
+      }
+    } catch (e) {
+      debugPrint("Registry errored");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: Icon(Iconsax.arrow_left),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
         body: Container(
           margin: EdgeInsets.all(24),
           child: Column(
@@ -25,13 +70,6 @@ class SignUpScreenState extends State<SignUpScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: Icon(Iconsax.arrow_left),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(height: 50),
                   Text(
                     "Create account",
                     style: TextStyle(
@@ -59,6 +97,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                       // First Name
                       Expanded(
                         child: TextFormField(
+                          controller: _nameController,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 20),
                             prefixIcon: Icon(Iconsax.user,
@@ -82,6 +121,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                       // Last Name
                       Expanded(
                         child: TextFormField(
+                          controller: _lastNameController,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 20),
                             prefixIcon: Icon(Iconsax.user,
@@ -106,6 +146,7 @@ class SignUpScreenState extends State<SignUpScreen> {
 
                   // Email
                   TextFormField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 20),
                       prefixIcon: Icon(Iconsax.direct_right,
@@ -126,6 +167,7 @@ class SignUpScreenState extends State<SignUpScreen> {
 
                   // Password
                   TextFormField(
+                    controller: _passwordController,
                     obscureText: isPasswordHidden,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 20),
@@ -159,6 +201,7 @@ class SignUpScreenState extends State<SignUpScreen> {
 
                   // Phone
                   TextFormField(
+                    controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.symmetric(vertical: 20),
@@ -182,12 +225,13 @@ class SignUpScreenState extends State<SignUpScreen> {
                   Row(
                     children: [
                       Checkbox(
-                          value: isChecking,
-                          onChanged: (value) {
-                            setState(() {
-                              isChecking = value!;
-                            });
-                          }),
+                        value: isChecking,
+                        onChanged: (value) {
+                          setState(() {
+                            isChecking = value!;
+                          });
+                        }
+                      ),
                       RichText(
                         text: TextSpan(
                           style: TextStyle(
@@ -213,7 +257,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => _register(),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor,
                         foregroundColor: Colors.white,

@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Bloogol',
       theme: ThemeData(
         textTheme: GoogleFonts.nunitoTextTheme(),
         primaryColor: const Color.fromARGB(255, 19, 75, 173), 

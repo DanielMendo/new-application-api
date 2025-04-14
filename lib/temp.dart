@@ -57,7 +57,7 @@ class _PostListState extends State<PostList> {
                       User user = userSnapshot.data!;
                       return ListTile(
                         title: Text(post.titulo),
-                        subtitle: Text('Por: ${user.nombre} ${user.apellidos}'),
+                        subtitle: Text('Por: ${user.name} ${user.lastName}'),
                       );
                     } else if (userSnapshot.hasError) {
                       return ListTile(
