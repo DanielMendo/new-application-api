@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:new_application_api/screens/auth/login_screen.dart';
+import 'package:new_application_api/screens/auth/email_sent_screen.dart';
 import 'package:new_application_api/services/auth/auth_service.dart';
 
 class ForgotScreen extends StatefulWidget {
@@ -35,7 +35,7 @@ class ForgotScreenState extends State<ForgotScreen> {
       if (response.success) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
+          MaterialPageRoute(builder: (context) => EmailSent()),
           (Route<dynamic> route) => false,
         );
 

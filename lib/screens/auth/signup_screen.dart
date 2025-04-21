@@ -27,15 +27,49 @@ class SignUpScreenState extends State<SignUpScreen> {
     if (!isChecking) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Accept the terms and conditions"),
+          backgroundColor: Colors.deepOrange,
           duration: const Duration(seconds: 3),
-          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Iconsax.warning_2, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text("Accept the terms and conditions",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold)),
+                      Text(
+                        "You must accept the terms and conditions before continuing.",
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                        softWrap: true,
+                        maxLines: 2,
+                      )
+                    ]),
+              )
+            ],
+          ),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(12),
         ),
       );
       return;
     }
 
     if (!_formKey.currentState!.validate()) return;
+
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+    );
 
     try {
       final registerResponse = await AuthService().register(
@@ -44,6 +78,8 @@ class SignUpScreenState extends State<SignUpScreen> {
           _phoneController.text.trim(),
           _emailController.text.trim(),
           _passwordController.text.trim());
+
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
 
       if (!mounted) return;
 
@@ -57,6 +93,8 @@ class SignUpScreenState extends State<SignUpScreen> {
         );
       }
     } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString()),

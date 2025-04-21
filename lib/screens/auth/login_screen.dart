@@ -27,9 +27,17 @@ class LoginScreenState extends State<LoginScreen> {
   void _login() async {
     if (!_formKey.currentState!.validate()) return;
 
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+    );
+
     try {
       final loginResponse = await AuthService()
           .login(_emailController.text.trim(), _passwordController.text.trim());
+
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
 
       if (!mounted) return;
 
@@ -42,6 +50,7 @@ class LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString()),
