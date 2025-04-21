@@ -1,0 +1,82 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../../models/login_response.dart';
+import '../../models/api_response.dart';
+
+class AuthService {
+  final String baseUrl = 'https://api-bloogol.up.railway.app/api';
+
+  // Login
+  Future<LoginResponse> login(String email, String password) async {
+    final response = await http.post(Uri.parse('$baseUrl/login'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({'email': email, 'password': password}));
+
+    if (response.statusCode == 200) {
+      return LoginResponse.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error['message'] ?? 'Something went wrong');
+    }
+  }
+
+  // Register
+  Future<LoginResponse> register(String name, String lastName, String phone,
+      String email, String password) async {
+    final response = await http.post(Uri.parse('$baseUrl/register'),
+        headers: {'Content-Type': 'application/json; charset=UTF-8'},
+        body: jsonEncode({
+          'name': name,
+          'last_name': lastName,
+          'phone': phone,
+          'email': email,
+          'password': password
+        }));
+
+    if (response.statusCode == 201) {
+      return LoginResponse.fromJson(json.decode(response.body));
+    } else {
+      final error = json.decode(response.body);
+      throw Exception(error['message'] ?? 'Something went wrong');
+    }
+  }
+
+  // Logout
+  Future<ApiResponse> logout(String token) async {
+    try {
+      final response = await http.post(Uri.parse('$baseUrl/logout'), headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token'
+      });
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, message: data['message']);
+      } else {
+        return ApiResponse(success: false, message: data['message']);
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Error: $e');
+    }
+  }
+
+  // Send Forgot Password
+  Future<ApiResponse> sendForgotPassword(String email) async {
+    try {
+      final response = await http.post(Uri.parse('$baseUrl/forgot-password'),
+          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          body: jsonEncode({'email': email}));
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, message: data['message']);
+      } else {
+        return ApiResponse(success: false, message: data['message']);
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Error: $e');
+    }
+  }
+}
