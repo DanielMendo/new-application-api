@@ -19,25 +19,13 @@ class SocialAuthButtons extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              color: Colors.grey.shade600,
-              height: 1,
-              width: 70,
-            ),
-            const SizedBox(width: 10),
             Text(
-              'or',
+              'Or sign in with',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 13,
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.bold,
               ),
-            ),
-            const SizedBox(width: 10),
-            Container(
-              color: Colors.grey.shade600,
-              height: 1,
-              width: 70,
             ),
           ],
         ),
@@ -46,33 +34,34 @@ class SocialAuthButtons extends StatelessWidget {
 
         /// Google & Facebook Buttons
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: onGoogleTap,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: const Color(0xFFF44336)),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset('assets/icons/google.svg'),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: IconButton(
+                onPressed: onGoogleTap,
+                icon: SvgPicture.asset(
+                  'assets/icons/google.svg',
+                  width: 30,
+                  height: 30,
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: GestureDetector(
-                onTap: onFacebookTap,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Theme.of(context).primaryColor),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset('assets/icons/fb.svg'),
+            SizedBox(width: 20),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: IconButton(
+                onPressed: onFacebookTap,
+                icon: SvgPicture.asset(
+                  'assets/icons/fb.svg',
+                  width: 30,
+                  height: 30,
                 ),
               ),
             ),

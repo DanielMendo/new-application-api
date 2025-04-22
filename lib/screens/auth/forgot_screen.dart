@@ -71,9 +71,31 @@ class ForgotScreenState extends State<ForgotScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response.message),
-            duration: Duration(seconds: 3),
             backgroundColor: Colors.red,
+            content: Row(
+              children: [
+                Icon(Iconsax.danger, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Invalid Email",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold)),
+                    Text(response.message,
+                        style: TextStyle(color: Colors.white, fontSize: 12))
+                  ],
+                ),
+              ],
+            ),
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(12),
           ),
         );
       }
@@ -82,9 +104,31 @@ class ForgotScreenState extends State<ForgotScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString()),
-          duration: Duration(seconds: 3),
           backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Iconsax.danger, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Invalid email",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold)),
+                  Text("Please check your email",
+                      style: TextStyle(color: Colors.white, fontSize: 12))
+                ],
+              ),
+            ],
+          ),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(12),
         ),
       );
     }

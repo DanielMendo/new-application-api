@@ -15,8 +15,15 @@ class HomeScreenState extends State<HomeScreen> {
   final user = UserSession.currentUser;
 
   void _logout() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+    );
     try {
       final response = await AuthService().logout(UserSession.token!);
+
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
 
       if (!mounted) return;
 
@@ -36,6 +43,7 @@ class HomeScreenState extends State<HomeScreen> {
         );
       }
     } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
       SnackBar(
         content: Text("Error logging out"),
         duration: Duration(seconds: 2),

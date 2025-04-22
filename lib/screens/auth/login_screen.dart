@@ -6,7 +6,8 @@ import 'package:new_application_api/screens/auth/signup_screen.dart';
 import 'package:new_application_api/services/auth/auth_service.dart';
 import 'package:new_application_api/utils/user_session.dart';
 import 'package:new_application_api/widgets/social_auth_buttons.dart';
-import 'package:new_application_api/services/auth/social_auth_helpers.dart';
+import 'package:new_application_api/services/auth/google_auth_service.dart';
+import 'package:new_application_api/services/auth/fb_auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,7 +43,8 @@ class LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (loginResponse.token != null) {
-        UserSession.setSession(loginResponse.user!, loginResponse.token!);
+        UserSession.setSession(loginResponse.user!, loginResponse.token!,
+            rememberMe: isChecking);
 
         Navigator.pushReplacement(
           context,
@@ -51,11 +53,148 @@ class LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(e.toString()),
-          duration: Duration(seconds: 3),
           backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Iconsax.danger, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Invalid credentials",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold)),
+                  Text("Please check your credentials",
+                      style: TextStyle(color: Colors.white, fontSize: 12))
+                ],
+              ),
+            ],
+          ),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(12),
+        ),
+      );
+    }
+  }
+
+  void _signInWithGoogle() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+    );
+    try {
+      final loginResponse = await GoogleAuthService().signInWithGoogle();
+
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      if (!mounted) return;
+
+      if (loginResponse.token != null) {
+        UserSession.setSession(loginResponse.user!, loginResponse.token!,
+            rememberMe: true);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Iconsax.direct_send, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Error signing with google",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold)),
+                  Text("Please check your internet connection",
+                      style: TextStyle(color: Colors.white, fontSize: 12))
+                ],
+              ),
+            ],
+          ),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(12),
+        ),
+      );
+    }
+  }
+
+  void _signInWithFb() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (_) => Center(child: CircularProgressIndicator()),
+    );
+    try {
+      final loginResponse = await FbAuthService().signInWithFb();
+
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      if (!mounted) return;
+
+      if (loginResponse.token != null) {
+        UserSession.setSession(loginResponse.user!, loginResponse.token!,
+            rememberMe: true);
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.red,
+          content: Row(
+            children: [
+              Icon(Iconsax.direct_send, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Error signing with facebook",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold)),
+                  Text("Please check your internet connection",
+                      style: TextStyle(color: Colors.white, fontSize: 12))
+                ],
+              ),
+            ],
+          ),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(12),
         ),
       );
     }
@@ -223,7 +362,7 @@ class LoginScreenState extends State<LoginScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 20),
+                          padding: EdgeInsets.symmetric(vertical: 18),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -235,41 +374,40 @@ class LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 15),
-
-                    // Register
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SignUpScreen()));
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Theme.of(context).primaryColor,
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                          side:
-                              BorderSide(color: Theme.of(context).primaryColor),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        child: Text(
-                          "Sign Up",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
                 SizedBox(height: 30),
                 SocialAuthButtons(
-                  onGoogleTap: () => AuthHelpers.signInWithGoogle(context),
-                  onFacebookTap: () => AuthHelpers.signInWithFb(context),
-                )
+                  onGoogleTap: () => _signInWithGoogle(),
+                  onFacebookTap: () => _signInWithFb(),
+                ),
+
+                SizedBox(height: 30),
+
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Don't have an account? "),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SignUpScreen()),
+                          );
+                        },
+                        child: Text(
+                          "Register",
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
