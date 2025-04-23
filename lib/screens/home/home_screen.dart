@@ -57,29 +57,30 @@ class HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
-          titleTextStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          // toolbarHeight: 80,
           title: Text(
-            'Home',
+            'Bloogol',
             style: TextStyle(
-              color: Colors.white,
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
             ),
           ),
           actions: <Widget>[
-            TextButton.icon(
+            // TextButton.icon(
+            //   onPressed: () => _logout(),
+            //   icon: Icon(Iconsax.logout, color: Colors.black, size: 20),
+            //   label: Text(
+            //     "Logout",
+            //     style: TextStyle(
+            //       color: Colors.black,
+            //       fontSize: 14,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // )
+            IconButton(
               onPressed: () => _logout(),
-              icon: Icon(Iconsax.logout, color: Colors.white, size: 20),
-              label: Text(
-                "Logout",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              icon: Icon(Iconsax.notification, color: Colors.black, size: 20),
             )
           ],
         ),
