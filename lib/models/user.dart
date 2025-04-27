@@ -2,7 +2,7 @@ class User {
   final int? id;
   final String name;
   final String? phone;
-  final String lastName;
+  final String? lastName;
   final String email;
 
   User({

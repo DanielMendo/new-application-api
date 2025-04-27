@@ -116,7 +116,7 @@ class LoginScreenState extends State<LoginScreen> {
           backgroundColor: Colors.red,
           content: Row(
             children: [
-              Icon(Iconsax.direct_send, color: Colors.white, size: 20),
+              Icon(Iconsax.danger, color: Colors.white, size: 20),
               SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

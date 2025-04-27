@@ -3,9 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:new_application_api/screens/home/home_screen.dart';
 import 'package:new_application_api/utils/user_session.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.white, // Aquí le pones el color que quieras
+    statusBarIconBrightness: Brightness.dark, // Iconos blancos
+  ));
   runApp(MyApp());
 }
 
@@ -25,6 +32,15 @@ class MyApp extends StatelessWidget {
             secondary: Colors.blueAccent,
           ),
         ),
+        localizationsDelegates: [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          quill.FlutterQuillLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'), // o pon 'es' si quieres español
+        ],
         home: FutureBuilder(
           future: UserSession.loadSession(),
           builder: (context, snapshot) {
