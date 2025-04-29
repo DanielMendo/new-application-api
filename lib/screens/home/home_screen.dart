@@ -66,6 +66,9 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
+
+  
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -74,7 +77,17 @@ class HomeScreenState extends State<HomeScreen> {
           toolbarHeight: 80,
           backgroundColor: Colors.transparent,
           title: Text(
-            'Bloogol',
+            _selectedIndex == 0
+                ? "Home"
+                : _selectedIndex == 1
+                    ? "Explorer"
+                    : _selectedIndex == 2
+                        ? "Create Post"
+                        : _selectedIndex == 3
+                            ? "Bookmarks"
+                            : _selectedIndex == 4
+                                ? "Profile"
+                                : "",
             style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.bold,
@@ -82,10 +95,25 @@ class HomeScreenState extends State<HomeScreen> {
             ),
           ),
           actions: <Widget>[
-            IconButton(
-              onPressed: () => _logout(),
-              icon: Icon(PhosphorIcons.bell, color: Colors.black, size: 22),
-            ),
+            if (_selectedIndex != 4)
+              IconButton(
+                onPressed: () => _logout(),
+                icon: Icon(PhosphorIcons.bell, color: Colors.black, size: 22),
+              ),
+            if (_selectedIndex == 4) ...[
+              IconButton(
+                onPressed: () {
+                  // Función del segundo nuevo botón
+                },
+                icon: Icon(PhosphorIcons.pencilSimple, color: Colors.black, size: 22),
+              ),
+              IconButton(
+                onPressed: () {
+                  // Función del primer nuevo botón
+                },
+                icon: Icon(PhosphorIcons.gear, color: Colors.black, size: 22),
+              ),
+            ]
           ],
         ),
         body: _pages[_selectedIndex],
