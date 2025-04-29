@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(8),
+      margin: EdgeInsets.all(5),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
@@ -14,120 +13,111 @@ class HomeView extends StatelessWidget {
           Padding(
               padding: EdgeInsets.only(left: 10),
               child: Text(
-                "For you",
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
+                "World News",
+                style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold),
               )),
           SizedBox(height: 10),
 
           /// --- [Posts] --- ///
-          Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              child: Column(
-                children: [
-                  ClipRRect(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(10)),
-                    child: Image.asset(
-                      "assets/posts/wather.jpg",
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: 150,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              backgroundImage:
-                                  AssetImage('assets/posts/avatar.png'),
-                              radius: 13,
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text(
-                              "John Doe",
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Texto del post
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundImage:
+                                AssetImage('assets/posts/avatar.png'),
+                            radius: 8,
+                          ),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'J Daniel M Mendoza',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 12,
                                 color: Colors.black,
                               ),
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        Text(
-                          "Emilio Azcarraga ah hecho blablabla",
-                          style: TextStyle(
-                              fontSize: 22,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(height: 15),
-                        Row(
-                          children: [
-                            Text(
-                              "12 min ago",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade600,
-                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
-                            SizedBox(width: 30),
-                            Row(
-                              children: [
-                                Icon(
-                                  PhosphorIcons.heartFill,
-                                  color: Colors.grey.shade600,
-                                  size: 14,
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  "0",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                )
-                              ],
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4),
+                      // Título
+                      Text(
+                        'DTO vs Resource in Laravel: What’s the Difference and When to Use Each',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 4,
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'In Laravel applications, managing how data enters and exits your app is crucial...',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[700],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 8),
+                      // Info extra (fecha, likes)
+                      Row(
+                        children: [
+                          Text(
+                            '2d ago',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
                             ),
-                            SizedBox(
-                              width: 30,
+                          ),
+                          SizedBox(width: 16),
+                          Icon(Icons.visibility,
+                              size: 14, color: Colors.grey[500]),
+                          SizedBox(width: 4),
+                          Text(
+                            '5',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[500],
                             ),
-                            Row(
-                              children: [
-                                Icon(
-                                  PhosphorIcons.chatFill,
-                                  color: Colors.grey.shade600,
-                                  size: 14,
-                                ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text(
-                                  "1",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                )
-                              ],
-                            )
-                          ],
-                        )
-                      ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 16),
+                // Imagen
+                Expanded(
+                  flex: 2,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'assets/posts/wather.jpg',
+                      fit: BoxFit.cover,
+                      height: 100,
                     ),
                   ),
-                ],
-              ))
+                ),
+              ],
+            ),
+          )
         ],
       ),
     );

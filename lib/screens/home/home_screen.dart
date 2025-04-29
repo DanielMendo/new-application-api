@@ -84,8 +84,8 @@ class HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             IconButton(
               onPressed: () => _logout(),
-              icon: Icon(PhosphorIcons.bell, color: Colors.black, size: 20),
-            )
+              icon: Icon(PhosphorIcons.bell, color: Colors.black, size: 22),
+            ),
           ],
         ),
         body: _pages[_selectedIndex],

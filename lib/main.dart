@@ -10,8 +10,8 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor: Colors.white, // Aquí le pones el color que quieras
-    statusBarIconBrightness: Brightness.dark, // Iconos blancos
+    statusBarColor: Colors.white,
+    statusBarIconBrightness: Brightness.dark,
   ));
   runApp(MyApp());
 }
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Bloogol',
         theme: ThemeData(
-          textTheme: GoogleFonts.nunitoTextTheme(),
+          textTheme: GoogleFonts.latoTextTheme(),
           primaryColor: const Color.fromARGB(255, 19, 75, 173),
           colorScheme: ColorScheme.fromSwatch().copyWith(
             primary: Color.fromARGB(255, 19, 75, 173),
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
           quill.FlutterQuillLocalizations.delegate,
         ],
         supportedLocales: const [
-          Locale('en'), // o pon 'es' si quieres español
+          Locale('en'),
         ],
         home: FutureBuilder(
           future: UserSession.loadSession(),
