@@ -27,7 +27,6 @@ class HomeView extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Texto del post
                 Expanded(
                   flex: 3,
                   child: Column(
@@ -55,7 +54,6 @@ class HomeView extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 4),
-                      // Título
                       Text(
                         'DTO vs Resource in Laravel: What’s the Difference and When to Use Each',
                         style: TextStyle(
@@ -76,7 +74,6 @@ class HomeView extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 8),
-                      // Info extra (fecha, likes)
                       Row(
                         children: [
                           Text(
