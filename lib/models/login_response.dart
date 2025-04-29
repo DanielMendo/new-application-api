@@ -15,4 +15,6 @@ class LoginResponse {
       token: json['token'],
     );
   }
+
+  get status => null;
 }
