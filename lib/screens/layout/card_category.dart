@@ -9,7 +9,6 @@ class Category {
 }
 
 List<Category> categories = [
-  Category(title: 'Top News', color: Colors.blue, icon: Icons.article),
   Category(
       title: 'Tech News & Trends', color: Colors.purple, icon: Icons.memory),
   Category(
@@ -18,8 +17,6 @@ List<Category> categories = [
       icon: Icons.attach_money),
   Category(
       title: 'Industry Insights', color: Colors.indigo, icon: Icons.insights),
-  Category(
-      title: 'Marketing & Media', color: Colors.orange, icon: Icons.campaign),
   Category(title: 'Skills & Learning', color: Colors.red, icon: Icons.school),
   Category(
       title: 'Hobby & Lifestyle',
@@ -31,7 +28,7 @@ List<Category> categories = [
 class CategoryCard extends StatelessWidget {
   final Category category;
 
-  const CategoryCard({Key? key, required this.category}) : super(key: key);
+  const CategoryCard({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {

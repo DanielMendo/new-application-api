@@ -66,9 +66,6 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
-  
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -105,7 +102,8 @@ class HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   // Función del segundo nuevo botón
                 },
-                icon: Icon(PhosphorIcons.pencilSimple, color: Colors.black, size: 22),
+                icon: Icon(PhosphorIcons.pencilSimple,
+                    color: Colors.black, size: 22),
               ),
               IconButton(
                 onPressed: () {
@@ -119,7 +117,16 @@ class HomeScreenState extends State<HomeScreen> {
         body: _pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
-          onTap: (index) => setState(() => _selectedIndex = index),
+          onTap: (index) {
+            if (index == 2) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CreatePostView()),
+              );
+            } else {
+              setState(() => _selectedIndex = index);
+            }
+          },
           type: BottomNavigationBarType.fixed,
           showSelectedLabels: false,
           showUnselectedLabels: false,

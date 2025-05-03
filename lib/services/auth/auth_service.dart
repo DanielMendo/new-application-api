@@ -4,7 +4,7 @@ import '../../models/login_response.dart';
 import '../../models/api_response.dart';
 
 class AuthService {
-  final String baseUrl = 'https://api-bloogol.up.railway.app/api';
+  final String baseUrl = 'http://192.168.1.70:8000/api';
 
   // Login
   Future<LoginResponse> login(String email, String password) async {
