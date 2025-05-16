@@ -4,7 +4,7 @@ import '../../models/login_response.dart';
 import '../../models/api_response.dart';
 
 class AuthService {
-  final String baseUrl = 'http://192.168.1.70:8000/api';
+  final String baseUrl = 'https://bloogol.com/api';
 
   // Login
   Future<LoginResponse> login(String email, String password) async {
@@ -67,6 +67,76 @@ class AuthService {
       final response = await http.post(Uri.parse('$baseUrl/forgot-password'),
           headers: {'Content-Type': 'application/json; charset=UTF-8'},
           body: jsonEncode({'email': email}));
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, message: data['message']);
+      } else {
+        return ApiResponse(success: false, message: data['message']);
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Error: $e');
+    }
+  }
+
+  // Update Email
+  Future<ApiResponse> updateEmail(String newEmail, String token) async {
+    try {
+      final response = await http.put(Uri.parse('$baseUrl/users/email'),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token'
+          },
+          body: jsonEncode({'email': newEmail}));
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, message: data['message']);
+      } else {
+        return ApiResponse(success: false, message: data['message']);
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Error: $e');
+    }
+  }
+
+  // Update Password
+  Future<ApiResponse> updatePassword(
+      String currentPassword, String newPassword, String token) async {
+    try {
+      final response = await http.put(Uri.parse('$baseUrl/users/password'),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token'
+          },
+          body: jsonEncode({
+            'current_password': currentPassword,
+            'new_password': newPassword
+          }));
+
+      final data = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return ApiResponse(success: true, message: data['message']);
+      } else {
+        return ApiResponse(success: false, message: data['message']);
+      }
+    } catch (e) {
+      return ApiResponse(success: false, message: 'Error: $e');
+    }
+  }
+
+  // Delete Account
+  Future<ApiResponse> deleteAccount(String password, String token) async {
+    try {
+      final response = await http.delete(Uri.parse('$baseUrl/users/delete'),
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token'
+          },
+          body: jsonEncode({'password': password}));
 
       final data = json.decode(response.body);
 

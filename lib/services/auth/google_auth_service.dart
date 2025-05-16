@@ -4,6 +4,8 @@ import '../../models/login_response.dart';
 import 'dart:convert';
 
 class GoogleAuthService {
+  final String baseUrl = 'https://bloogol.com/api';
+
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
   );
@@ -19,7 +21,7 @@ class GoogleAuthService {
     final idToken = googleAuth.accessToken;
 
     final response = await http.post(
-      Uri.parse('https://api-bloogol.up.railway.app/api/google/callback'),
+      Uri.parse('$baseUrl/google/callback'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'token': idToken}),
     );

@@ -1,53 +1,71 @@
 import 'package:flutter/material.dart';
-
-class Category {
-  final String title;
-  final Color color;
-  final IconData icon;
-
-  Category({required this.title, required this.color, required this.icon});
-}
-
-List<Category> categories = [
-  Category(
-      title: 'Tech News & Trends', color: Colors.purple, icon: Icons.memory),
-  Category(
-      title: 'Business & Finance',
-      color: Colors.teal,
-      icon: Icons.attach_money),
-  Category(
-      title: 'Industry Insights', color: Colors.indigo, icon: Icons.insights),
-  Category(title: 'Skills & Learning', color: Colors.red, icon: Icons.school),
-  Category(
-      title: 'Hobby & Lifestyle',
-      color: Colors.green,
-      icon: Icons.self_improvement),
-  Category(title: 'Sports', color: Colors.lightBlue, icon: Icons.sports_soccer),
-];
+import 'package:new_application_api/models/category.dart';
+import 'package:new_application_api/screens/views/category_posts_view.dart';
 
 class CategoryCard extends StatelessWidget {
   final Category category;
+  final String baseUrl = 'https://bloogol.com/storage/';
 
   const CategoryCard({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: category.color.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Center(
-        child: Text(
-          category.title,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+    return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CategoryDetailScreen(
+                categoryId: category.id,
+                categoryName: category.name,
+                categoryDescription: category.description,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-      ),
-    );
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.network(
+                  '$baseUrl${category.image}',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey,
+                    child:
+                        Icon(Icons.broken_image, size: 60, color: Colors.white),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withOpacity(0.4),
+                ),
+              ),
+              Center(
+                child: Text(
+                  category.name,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 4,
+                        color: Colors.black45,
+                        offset: Offset(1, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 }

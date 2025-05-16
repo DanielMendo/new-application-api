@@ -32,14 +32,15 @@ class MyApp extends StatelessWidget {
             secondary: Colors.blueAccent,
           ),
         ),
+        darkTheme: ThemeData(
+          brightness: Brightness.light,
+        ),
+        themeMode: ThemeMode.light,
         localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
           quill.FlutterQuillLocalizations.delegate,
-        ],
-        supportedLocales: const [
-          Locale('en'),
         ],
         home: FutureBuilder(
           future: UserSession.loadSession(),

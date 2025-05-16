@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:new_application_api/services/toolbar_basic.dart';
@@ -204,14 +203,21 @@ class _CreatePostView extends State<CreatePostView> {
                       icon: Icons.camera_alt_outlined,
                       label: 'Tomar foto',
                       onTap: () async {
-                        final pickedFile = await ImagePicker()
-                            .pickImage(source: ImageSource.camera);
-                        if (pickedFile != null) {
-                          final imageUrl = pickedFile.path;
-                          final index = _controller.selection.baseOffset;
-                          _controller.replaceText(
-                              index, 0, BlockEmbed.image(imageUrl), null);
-                        }
+                        final picker = ImagePicker();
+                        final XFile? pickedFile =
+                            await picker.pickImage(source: ImageSource.camera);
+
+                        if (pickedFile == null) return;
+
+                        final imageFile = File(pickedFile.path);
+
+                        imageUrl =
+                            await UploadImage().uploadImage(imageFile, token);
+
+                        final index = _controller.selection.baseOffset;
+                        _controller.replaceText(
+                            index, 0, BlockEmbed.image(imageUrl!), null);
+
                         Navigator.of(context).pop();
                       },
                     ),
@@ -286,7 +292,9 @@ class _CreatePostView extends State<CreatePostView> {
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: Icon(Iconsax.arrow_left, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: Text('', style: TextStyle(color: Colors.black)),
         actions: [

@@ -1,114 +1,111 @@
 import 'package:flutter/material.dart';
+import 'package:new_application_api/models/post.dart';
+import 'package:new_application_api/screens/layout/card_post.dart';
+import 'package:new_application_api/services/post_service.dart';
+import 'package:new_application_api/utils/user_session.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-class BookmarksView extends StatelessWidget {
+class BookmarksView extends StatefulWidget {
   const BookmarksView({super.key});
+
+  @override
+  _BookmarksViewState createState() => _BookmarksViewState();
+}
+
+class _BookmarksViewState extends State<BookmarksView> {
+  late Future<List<Post>> _postsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _postsFuture = _fetchPosts();
+  }
+
+  Future<List<Post>> _fetchPosts() async {
+    final postService = PostService();
+    return postService.getFavorites(UserSession.token!);
+  }
+
+  Future<void> _refreshPosts() async {
+    setState(() {
+      _postsFuture = _fetchPosts();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        margin: EdgeInsets.all(5),
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 80,
+        backgroundColor: Colors.transparent,
+        title: const Text(
+          "Bookmarks",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(PhosphorIcons.bell, color: Colors.black, size: 22),
+          ),
+        ],
+      ),
+      body: Container(
+        margin: const EdgeInsets.all(5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(left: 10),
               child: Text(
-                "Your Library",
+                "Your library",
                 style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
+                  fontSize: 24,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
+            const SizedBox(height: 10),
+
             /// --- [Posts] --- ///
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage:
-                                AssetImage('assets/posts/avatar.png'),
-                            radius: 8,
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'J Daniel M Mendoza',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refreshPosts,
+                child: FutureBuilder<List<Post>>(
+                  future: _postsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+                    if (snapshot.data!.isEmpty) {
+                      return const Center(
+                          child: Text('No tienes posts guardados'));
+                    }
+                    final posts = snapshot.data!;
+                    return ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return PostPreviewCard(post: post);
+                      },
+                      separatorBuilder: (context, index) => Divider(
+                        color: Colors.grey.shade200,
+                        thickness: 1,
+                        height: 24,
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        'DTO vs Resource in Laravel: What’s the Difference and When to Use Each',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 4,
-                      ),
-                      SizedBox(height: 8),
-                      
-                      Row(
-                        children: [
-                          Text(
-                            '2d ago',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Icon(Icons.visibility,
-                              size: 14, color: Colors.grey[500]),
-                          SizedBox(width: 4),
-                          Text(
-                            '5',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-                SizedBox(width: 16),
-                // Imagen
-                Expanded(
-                  flex: 2,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      'assets/posts/wather.jpg',
-                      fit: BoxFit.cover,
-                      height: 100,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          Divider(
-            thickness: 1,
-            color: Colors.grey.shade200,
-          ),
           ],
         ),
       ),

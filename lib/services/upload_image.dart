@@ -4,7 +4,7 @@ import 'package:path/path.dart' as path;
 import 'dart:convert';
 
 class UploadImage {
-  final String baseUrl = 'http://192.168.1.70:8000/api/editor/image/upload';
+  final String baseUrl = 'https://bloogol.com/api/editor/image/upload';
 
   Future<String> uploadImage(File imageFile, String token) async {
     final uri = Uri.parse(baseUrl);

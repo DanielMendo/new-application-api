@@ -1,132 +1,111 @@
 import 'package:flutter/material.dart';
-import 'package:new_application_api/screens/auth/login_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:new_application_api/screens/views/create_post_view.dart';
-import 'package:new_application_api/utils/user_session.dart';
-import 'package:new_application_api/services/auth/auth_service.dart';
-import 'package:new_application_api/screens/views/profile_view.dart';
 import 'package:new_application_api/screens/views/search_view.dart';
 import 'package:new_application_api/screens/views/home_view.dart';
 import 'package:new_application_api/screens/views/bookmarks_view.dart';
+import 'package:new_application_api/screens/views/user_profile_view.dart';
+import 'package:new_application_api/utils/user_session.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int? initialTab;
+  final Widget? customBody;
+
+  const HomeScreen({
+    super.key,
+    this.initialTab,
+    this.customBody,
+  });
 
   @override
   HomeScreenState createState() => HomeScreenState();
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  final user = UserSession.currentUser;
+  Widget? customBody;
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
     const HomeView(),
     const SearchView(),
-    const CreatePostView(),
     const BookmarksView(),
-    const ProfileView(),
+    UserProfileView(user: UserSession.currentUser!, itsMe: true),
   ];
 
-  void _logout() async {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (_) => Center(child: CircularProgressIndicator()),
+  void showCustomView(Widget? view) {
+    setState(() {
+      customBody = view;
+    });
+  }
+
+  ImageProvider _getProfileImage() {
+    final baseUrl = 'https://bloogol.com/storage/';
+    final profileImage = UserSession.currentUser?.profileImage;
+    if (profileImage != null && profileImage.isNotEmpty) {
+      return NetworkImage('$baseUrl$profileImage');
+    }
+    return const AssetImage('assets/posts/avatar.png');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialTab ?? 0;
+    customBody = widget.customBody;
+
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+      ),
     );
-    try {
-      final response = await AuthService().logout(UserSession.token!);
+  }
 
-      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-      if (!mounted) return;
+    final image = _getProfileImage();
+    if (image is NetworkImage) {
+      precacheImage(image, context);
+    }
+  }
 
-      if (response.success) {
-        UserSession.clearSession();
-
-        Navigator.pushAndRemoveUntil(
+  void _onItemTapped(int index) {
+    setState(() {
+      customBody = null;
+      if (index == 2) {
+        Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => LoginScreen()),
-          (Route<dynamic> route) => false,
+          MaterialPageRoute(builder: (context) => const CreatePostView()),
         );
       } else {
-        SnackBar(
-          content: Text(response.message),
-          duration: Duration(seconds: 2),
-          backgroundColor: Colors.red,
-        );
+        _selectedIndex = index > 2 ? index - 1 : index;
       }
-    } catch (e) {
-      if (mounted) Navigator.of(context, rootNavigator: true).pop();
-      SnackBar(
-        content: Text("Error logging out"),
-        duration: Duration(seconds: 2),
-        backgroundColor: Colors.red,
-      );
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+      ),
       child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 80,
-          backgroundColor: Colors.transparent,
-          title: Text(
-            _selectedIndex == 0
-                ? "Home"
-                : _selectedIndex == 1
-                    ? "Explorer"
-                    : _selectedIndex == 2
-                        ? "Create Post"
-                        : _selectedIndex == 3
-                            ? "Bookmarks"
-                            : _selectedIndex == 4
-                                ? "Profile"
-                                : "",
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 22,
-            ),
-          ),
-          actions: <Widget>[
-            if (_selectedIndex != 4)
-              IconButton(
-                onPressed: () => _logout(),
-                icon: Icon(PhosphorIcons.bell, color: Colors.black, size: 22),
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: customBody ??
+              IndexedStack(
+                index: _selectedIndex,
+                children: _pages,
               ),
-            if (_selectedIndex == 4) ...[
-              IconButton(
-                onPressed: () {
-                  // Función del segundo nuevo botón
-                },
-                icon: Icon(PhosphorIcons.pencilSimple,
-                    color: Colors.black, size: 22),
-              ),
-              IconButton(
-                onPressed: () {
-                  // Función del primer nuevo botón
-                },
-                icon: Icon(PhosphorIcons.gear, color: Colors.black, size: 22),
-              ),
-            ]
-          ],
         ),
-        body: _pages[_selectedIndex],
         bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            if (index == 2) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => CreatePostView()),
-              );
-            } else {
-              setState(() => _selectedIndex = index);
-            }
-          },
+          currentIndex:
+              _selectedIndex < 2 ? _selectedIndex : _selectedIndex + 1,
+          onTap: _onItemTapped,
           type: BottomNavigationBarType.fixed,
           showSelectedLabels: false,
           showUnselectedLabels: false,
@@ -134,50 +113,77 @@ class HomeScreenState extends State<HomeScreen> {
           elevation: 15,
           items: [
             BottomNavigationBarItem(
-                icon: Icon(
-                  _selectedIndex == 0
-                      ? PhosphorIcons.houseFill
-                      : PhosphorIcons.house,
-                  size: 26,
-                  color: Colors.black,
-                ),
-                label: ''),
+              icon: Icon(
+                _selectedIndex == 0
+                    ? PhosphorIcons.houseFill
+                    : PhosphorIcons.house,
+                size: 26,
+                color: Colors.black,
+              ),
+              label: '',
+            ),
             BottomNavigationBarItem(
-                icon: Icon(
-                  _selectedIndex == 1
-                      ? PhosphorIcons.magnifyingGlassFill
-                      : PhosphorIcons.magnifyingGlass,
-                  size: 26,
-                  color: Colors.black,
-                ),
-                label: ''),
+              icon: Icon(
+                _selectedIndex == 1
+                    ? PhosphorIcons.magnifyingGlassFill
+                    : PhosphorIcons.magnifyingGlass,
+                size: 26,
+                color: Colors.black,
+              ),
+              label: '',
+            ),
             BottomNavigationBarItem(
-                icon: Icon(
-                  _selectedIndex == 2
-                      ? PhosphorIcons.plusCircleFill
-                      : PhosphorIcons.plusCircle,
-                  size: 28,
-                  color: Colors.black,
-                ),
-                label: ''),
+              icon: Icon(
+                PhosphorIcons.plusCircle,
+                size: 28,
+                color: Colors.black,
+              ),
+              activeIcon: Icon(
+                PhosphorIcons.plusCircleFill,
+                size: 28,
+                color: Colors.black,
+              ),
+              label: '',
+            ),
             BottomNavigationBarItem(
-                icon: Icon(
-                  _selectedIndex == 3
-                      ? PhosphorIcons.bookBookmarkFill
-                      : PhosphorIcons.bookBookmark,
-                  size: 26,
-                  color: Colors.black,
-                ),
-                label: ''),
+              icon: Icon(
+                _selectedIndex == 2
+                    ? PhosphorIcons.bookBookmarkFill
+                    : PhosphorIcons.bookBookmark,
+                size: 26,
+                color: Colors.black,
+              ),
+              label: '',
+            ),
             BottomNavigationBarItem(
-                icon: Icon(
-                  _selectedIndex == 4
-                      ? PhosphorIcons.userFill
-                      : PhosphorIcons.user,
-                  size: 26,
-                  color: Colors.black,
+              icon: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: _selectedIndex == 3
+                        ? Colors.black
+                        : Colors.grey.shade300,
+                    width: 2,
+                  ),
                 ),
-                label: ''),
+                child: ClipOval(
+                  child: FadeInImage(
+                    placeholder: const AssetImage('assets/posts/avatar.png'),
+                    image: _getProfileImage(),
+                    fit: BoxFit.cover,
+                    width: 24,
+                    height: 24,
+                    fadeInDuration: const Duration(milliseconds: 200),
+                    imageErrorBuilder: (context, error, stackTrace) =>
+                        Image.asset('assets/posts/avatar.png',
+                            fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+              label: '',
+            ),
           ],
         ),
       ),

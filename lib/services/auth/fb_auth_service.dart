@@ -5,14 +5,15 @@ import 'package:new_application_api/models/login_response.dart';
 
 class FbAuthService {
   Future<LoginResponse> signInWithFb() async {
+    final String baseUrl = 'https://bloogol.com/api';
+
     final LoginResult result = await FacebookAuth.instance.login();
 
     if (result.status == LoginStatus.success) {
-
       final AccessToken accessToken = result.accessToken!;
 
       final response = await http.post(
-        Uri.parse('https://api-bloogol.up.railway.app/api/facebook/callback'),
+        Uri.parse('$baseUrl/facebook/callback'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'token': accessToken.tokenString}),
       );
@@ -21,11 +22,12 @@ class FbAuthService {
         return LoginResponse.fromJson(json.decode(response.body));
       } else {
         final error = json.decode(response.body);
-        throw Exception(error['message'] ?? 'Error al iniciar sesión con Facebook');
+        throw Exception(
+            error['message'] ?? 'Error al iniciar sesión con Facebook');
       }
     } else {
-      throw Exception('Error al iniciar sesión con Facebook: ${result.message}');
+      throw Exception(
+          'Error al iniciar sesión con Facebook: ${result.message}');
     }
-    
   }
 }

@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:new_application_api/screens/home/home_screen.dart';
 import 'package:new_application_api/screens/views/select_categories.dart';
+import 'package:new_application_api/screens/views/select_privacy.dart';
+import 'package:new_application_api/services/post_service.dart';
+import 'package:new_application_api/utils/user_session.dart';
+import 'package:new_application_api/models/category.dart';
 
 class PreviewPostView extends StatefulWidget {
+  Category? selectedCategory;
+  bool? privacy;
   final String title;
   final String description;
-  final String? image;
   final String html;
-  String? selectedCategory;
+  final String? image;
 
   PreviewPostView(
       {super.key,
+      this.selectedCategory,
+      this.privacy,
       required this.title,
       required this.description,
-      this.selectedCategory,
       required this.html,
       this.image});
 
@@ -23,6 +30,94 @@ class PreviewPostView extends StatefulWidget {
 
 class _PreviewPostViewState extends State<PreviewPostView> {
   bool isUnlisted = false;
+
+  Future<void> _createPost() async {
+    if (widget.selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor selecciona una categoría')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final response = await PostService().createPost(
+          UserSession.currentUser!.id!,
+          widget.selectedCategory!.id,
+          widget.title,
+          widget.description,
+          widget.html,
+          widget.image ?? '',
+          true,
+          UserSession.token!);
+
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      if (!mounted) return;
+
+      if (response.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: Colors.green,
+            content: Row(
+              children: [
+                Icon(Iconsax.edit, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Publicación publicada",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold)),
+                    Text("Publicación creada con éxito",
+                        style: TextStyle(color: Colors.white, fontSize: 12))
+                  ],
+                ),
+              ],
+            ),
+            duration: Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(12),
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(response.message),
+            duration: Duration(seconds: 3),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$e'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +162,7 @@ class _PreviewPostViewState extends State<PreviewPostView> {
                           SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'J Daniel M Mendoza',
+                              '${UserSession.currentUser!.name} ${UserSession.currentUser!.lastName ?? ''}',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.black,
@@ -102,10 +197,6 @@ class _PreviewPostViewState extends State<PreviewPostView> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        widget.image ?? '',
-                      )
                     ],
                   )),
             ),
@@ -114,11 +205,11 @@ class _PreviewPostViewState extends State<PreviewPostView> {
                 title: Text('Categoría',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                subtitle: Text(
-                    widget.selectedCategory ?? 'Categoría no seleccionada'),
+                subtitle: Text(widget.selectedCategory?.name ??
+                    'Categoría no seleccionada'),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () async {
-                  final selectedCategory = await Navigator.push(
+                  final selectedCategory = await Navigator.push<Category>(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
@@ -128,7 +219,6 @@ class _PreviewPostViewState extends State<PreviewPostView> {
 
                   if (selectedCategory != null) {
                     setState(() {
-                      // Guarda la categoría seleccionada en la vista actual
                       widget.selectedCategory = selectedCategory;
                     });
                   }
@@ -137,22 +227,23 @@ class _PreviewPostViewState extends State<PreviewPostView> {
             ListTile(
               title: Text('Privacidad',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              subtitle: Text('Privacidad no seleccionada'),
+              subtitle: Text(widget.privacy == null
+                  ? 'Privacidad no seleccionada'
+                  : (widget.privacy! ? 'Público' : 'Privado')),
               trailing: Icon(Icons.chevron_right),
-              onTap: () {},
-            ),
-            Divider(),
-            ListTile(
-              title: Text('Unlisted Story',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              trailing: Switch(
-                value: isUnlisted,
-                onChanged: (value) {
+              onTap: () async {
+                final privacy = await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SelectPrivacyView(widget.privacy)),
+                );
+
+                if (privacy != null) {
                   setState(() {
-                    isUnlisted = value;
+                    widget.privacy = privacy;
                   });
-                },
-              ),
+                }
+              },
             ),
             Spacer(),
             SizedBox(
@@ -163,10 +254,10 @@ class _PreviewPostViewState extends State<PreviewPostView> {
                   padding: EdgeInsets.symmetric(vertical: 16),
                 ),
                 onPressed: () {
-                  // Acción de publicar
+                  _createPost();
                 },
                 child: Text(
-                  'Publish now',
+                  'Publicar ahora',
                   style: TextStyle(color: Colors.white),
                 ),
               ),

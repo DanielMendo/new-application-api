@@ -1,220 +1,112 @@
 import 'package:flutter/material.dart';
+import 'package:new_application_api/models/post.dart';
+import 'package:new_application_api/screens/layout/card_post.dart';
+import 'package:new_application_api/services/post_service.dart';
+import 'package:new_application_api/utils/user_session.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  _HomeViewState createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  late Future<List<Post>> _postsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _postsFuture = _fetchPosts();
+  }
+
+  Future<List<Post>> _fetchPosts() async {
+    final postService = PostService();
+    return postService.getAllPostsFollowing(UserSession.token!);
+  }
+
+  Future<void> _refreshPosts() async {
+    setState(() {
+      _postsFuture = _fetchPosts();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 80,
+        backgroundColor: Colors.transparent,
+        title: const Text(
+          "Home",
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(PhosphorIcons.bell, color: Colors.black, size: 22),
+          ),
+        ],
+      ),
+      body: Container(
+        margin: const EdgeInsets.all(5),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const Padding(
               padding: EdgeInsets.only(left: 10),
               child: Text(
-                "World News",
+                "Comienza aquí",
                 style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold),
-              )),
-          SizedBox(height: 10),
-
-          /// --- [Posts] --- ///
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage:
-                                AssetImage('assets/posts/avatar.png'),
-                            radius: 8,
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'J Daniel M Mendoza',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'DTO vs Resource in Laravel: What’s the Difference and When to Use Each',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 4,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'In Laravel applications, managing how data enters and exits your app is crucial...',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Text(
-                            '2d ago',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Icon(Icons.visibility,
-                              size: 14, color: Colors.grey[500]),
-                          SizedBox(width: 4),
-                          Text(
-                            '5',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  fontSize: 24,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(width: 16),
-                // Imagen
-                Expanded(
-                  flex: 2,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      'assets/posts/wather.jpg',
-                      fit: BoxFit.cover,
-                      height: 100,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          Divider(
-            thickness: 1,
-            color: Colors.grey.shade200,
-          ),
-           /// --- [Posts] --- ///
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundImage:
-                                AssetImage('assets/posts/avatar.png'),
-                            radius: 8,
-                          ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'J Daniel M Mendoza',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
+            const SizedBox(height: 10),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _refreshPosts,
+                child: FutureBuilder<List<Post>>(
+                  future: _postsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+                    if (snapshot.data!.isEmpty) {
+                      return const Center(
+                          child: Text('Sigue a alguien para ver sus posts'));
+                    }
+                    final posts = snapshot.data!;
+                    return ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: posts.length,
+                      itemBuilder: (context, index) {
+                        final post = posts[index];
+                        return PostPreviewCard(post: post);
+                      },
+                      separatorBuilder: (context, index) => Divider(
+                        color: Colors.grey.shade200,
+                        thickness: 1,
+                        height: 24,
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        'DTO vs Resource in Laravel: What’s the Difference and When to Use Each',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 4,
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        'In Laravel applications, managing how data enters and exits your app is crucial...',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[700],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Text(
-                            '2d ago',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                          SizedBox(width: 16),
-                          Icon(Icons.visibility,
-                              size: 14, color: Colors.grey[500]),
-                          SizedBox(width: 4),
-                          Text(
-                            '5',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
-                SizedBox(width: 16),
-                // Imagen
-                Expanded(
-                  flex: 2,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      'assets/posts/wather.jpg',
-                      fit: BoxFit.cover,
-                      height: 100,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-
-        ],
+          ],
+        ),
       ),
     );
   }
