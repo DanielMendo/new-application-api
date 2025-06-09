@@ -2,7 +2,6 @@ class User {
   final int? id;
   final String name;
   final String? lastName;
-  final String? phone;
   final String email;
   final String? profileImage;
   final String? bio;
@@ -10,7 +9,6 @@ class User {
   User({
     required this.id,
     required this.name,
-    required this.phone,
     required this.lastName,
     required this.email,
     this.profileImage,
@@ -22,7 +20,6 @@ class User {
       id: id,
       name: name,
       lastName: lastName,
-      phone: phone,
       email: email,
       profileImage: profileImage,
       bio: bio,
@@ -39,7 +36,6 @@ class User {
       id: id,
       name: name ?? this.name,
       lastName: lastName ?? this.lastName,
-      phone: phone,
       email: email,
       bio: bio ?? this.bio,
       profileImage: profileImage ?? this.profileImage,
@@ -51,7 +47,6 @@ class User {
       id: id,
       name: name,
       lastName: lastName,
-      phone: phone,
       email: email,
       profileImage: profileImage,
       bio: bio,
@@ -63,7 +58,6 @@ class User {
       id: int.parse(json['id'].toString()),
       name: json['name'],
       lastName: json['last_name'],
-      phone: json['phone'],
       email: json['email'],
       profileImage: json['profile_image'],
       bio: json['bio'],
@@ -75,7 +69,6 @@ class User {
       'id': id,
       'name': name,
       'last_name': lastName,
-      'phone': phone,
       'email': email,
       'profile_image': profileImage,
       'bio': bio,

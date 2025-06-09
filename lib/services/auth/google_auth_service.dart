@@ -1,10 +1,11 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import '../../models/login_response.dart';
+import 'package:new_application_api/config.dart';
 import 'dart:convert';
 
 class GoogleAuthService {
-  final String baseUrl = 'https://bloogol.com/api';
+  final String baseUrl = AppConfig.baseUrl;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],

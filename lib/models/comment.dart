@@ -1,9 +1,12 @@
+import 'package:new_application_api/models/user.dart';
+
 class Comment {
   final int id;
+  final User user;
   final int? parentId;
   final int userId;
   final String name;
-  final String profileImageUrl;
+  final String? profileImageUrl;
   final String content;
   final String createdAt;
   final int likes;
@@ -12,10 +15,11 @@ class Comment {
 
   Comment({
     required this.id,
+    required this.user,
     this.parentId,
     required this.userId,
     required this.name,
-    required this.profileImageUrl,
+    this.profileImageUrl,
     required this.content,
     required this.createdAt,
     required this.likes,
@@ -24,8 +28,10 @@ class Comment {
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
+    print(json);
     return Comment(
       id: json['id'],
+      user: User.fromJson(json['user']),
       parentId: json['parent_id'],
       userId: json['user']['id'],
       name: json['user']['name'],

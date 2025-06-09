@@ -2,13 +2,17 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:new_application_api/services/toolbar_basic.dart';
-import 'package:new_application_api/utils/user_session.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
-import 'package:new_application_api/screens/views/preview_post.view.dart';
-import 'package:new_application_api/services/upload_image.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:new_application_api/services/toolbar_basic.dart';
+import 'package:new_application_api/utils/image_compressed.dart';
+import 'package:new_application_api/utils/user_session.dart';
+import 'package:new_application_api/services/upload_image.dart';
+import 'package:new_application_api/widgets/minimal_option.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class CreatePostView extends StatefulWidget {
   const CreatePostView({super.key});
@@ -21,12 +25,18 @@ class _CreatePostView extends State<CreatePostView> {
   final user = UserSession.currentUser;
   final token = UserSession.token!;
 
-  String? imageUrl;
+  List<String> imageUrls = [];
+  String? currentThumbnailUrl;
 
   final QuillController _controller = QuillController.basic();
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _titleController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   Future<void> _handleAction(String action) async {
     if (!mounted) return;
@@ -199,55 +209,80 @@ class _CreatePostView extends State<CreatePostView> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    _MinimalOption(
-                      icon: Icons.camera_alt_outlined,
+                    MinimalOption(
+                      icon: PhosphorIcons.camera,
                       label: 'Tomar foto',
                       onTap: () async {
-                        final picker = ImagePicker();
-                        final XFile? pickedFile =
-                            await picker.pickImage(source: ImageSource.camera);
-
+                        final pickedFile = await ImagePicker()
+                            .pickImage(source: ImageSource.camera);
                         if (pickedFile == null) return;
 
-                        final imageFile = File(pickedFile.path);
+                        final compressedFile = await ImageCompressed()
+                            .compressImage(File(pickedFile.path));
+                        if (compressedFile == null) return;
 
-                        imageUrl =
-                            await UploadImage().uploadImage(imageFile, token);
+                        final uploadedImageUrl = await UploadImage()
+                            .uploadImage(File(compressedFile.path), token);
+
+                        setState(() {
+                          imageUrls.add(uploadedImageUrl);
+                        });
 
                         final index = _controller.selection.baseOffset;
+
                         _controller.replaceText(
-                            index, 0, BlockEmbed.image(imageUrl!), null);
+                            index, 0, BlockEmbed.image(uploadedImageUrl), null);
 
                         Navigator.of(context).pop();
                       },
                     ),
-                    _MinimalOption(
-                      icon: Icons.photo_outlined,
+                    MinimalOption(
+                      icon: PhosphorIcons.image,
                       label: 'Seleccionar de galería',
                       onTap: () async {
-                        final picker = ImagePicker();
-                        final XFile? pickedFile =
-                            await picker.pickImage(source: ImageSource.gallery);
-
+                        final pickedFile = await ImagePicker()
+                            .pickImage(source: ImageSource.gallery);
                         if (pickedFile == null) return;
 
-                        final imageFile = File(pickedFile.path);
+                        final compressedFile = await ImageCompressed()
+                            .compressImage(File(pickedFile.path));
+                        if (compressedFile == null) return;
 
-                        imageUrl =
-                            await UploadImage().uploadImage(imageFile, token);
+                        final uploadedImageUrl = await UploadImage()
+                            .uploadImage(File(compressedFile.path), token);
+
+                        setState(() {
+                          imageUrls.add(uploadedImageUrl);
+                        });
 
                         final index = _controller.selection.baseOffset;
-                        _controller.replaceText(
-                            index, 0, BlockEmbed.image(imageUrl!), null);
 
+                        _controller.replaceText(
+                            index, 0, BlockEmbed.image(uploadedImageUrl), null);
                         Navigator.of(context).pop();
                       },
                     ),
-                    _MinimalOption(
-                      icon: Icons.image_search_outlined,
+                    MinimalOption(
+                      icon: PhosphorIcons.magnifyingGlass,
                       label: 'Escoger de Unsplash',
-                      onTap: () {
-                        print('Abrir búsqueda de imágenes en Unsplash');
+                      onTap: () async {
+                        final imageUrl =
+                            await context.push<String>('/unsplash-search');
+
+                        if (imageUrl == null) {
+                          Navigator.of(context).pop();
+                          return;
+                        }
+
+                        setState(() {
+                          imageUrls.add(imageUrl);
+                        });
+
+                        final index = _controller.selection.baseOffset;
+
+                        _controller.replaceText(
+                            index, 0, BlockEmbed.image(imageUrl), null);
+
                         Navigator.of(context).pop();
                       },
                     ),
@@ -293,33 +328,46 @@ class _CreatePostView extends State<CreatePostView> {
         leading: IconButton(
           icon: Icon(Iconsax.arrow_left, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);
+            context.pop();
           },
         ),
         title: Text('', style: TextStyle(color: Colors.black)),
         actions: [
           TextButton(
             onPressed: () {
+              String getPlainText(QuillController controller) {
+                final delta = controller.document.toDelta();
+                if (delta.isEmpty) return '';
+                String plainText = '';
+                for (var operation in delta.toList()) {
+                  if (operation.isInsert && operation.data is String) {
+                    plainText += operation.data as String;
+                  }
+                }
+
+                return plainText.trim();
+              }
+
+              currentThumbnailUrl = imageUrls.first;
               final title = _titleController.text.trim();
-              final description = _controller.document.toPlainText().trim();
+              final description = getPlainText(_controller);
               final html = jsonEncode(_controller.document.toDelta().toJson());
 
-              if (title.isNotEmpty && description.isNotEmpty) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PreviewPostView(
-                        title: title,
-                        description: description,
-                        image: imageUrl,
-                        html: html),
-                  ),
-                );
+              if (title.isNotEmpty &&
+                  description.isNotEmpty &&
+                  currentThumbnailUrl != null) {
+                context.push('/preview-post', extra: {
+                  'title': title,
+                  'description': description,
+                  'image': currentThumbnailUrl,
+                  'html': html,
+                  'allImages': imageUrls,
+                });
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                       content: Text(
-                          'El título y el contenido no pueden estar vacíos')),
+                          'El título, la imagen y el contenido no pueden estar vacíos')),
                 );
               }
             },
@@ -333,9 +381,11 @@ class _CreatePostView extends State<CreatePostView> {
           children: [
             TextField(
               controller: _titleController,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+              style: GoogleFonts.inter(
+                fontSize: 30,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+                letterSpacing: -0.5,
               ),
               decoration: InputDecoration(
                 hintText: "Título",
@@ -351,50 +401,36 @@ class _CreatePostView extends State<CreatePostView> {
                 scrollController: _scrollController,
                 focusNode: _focusNode,
                 config: QuillEditorConfig(
-                    placeholder: 'Escribe aquí...',
-                    enableInteractiveSelection: true,
-                    embedBuilders: FlutterQuillEmbeds.defaultEditorBuilders()),
+                  placeholder: 'Escribe aquí...',
+                  enableInteractiveSelection: true,
+                  embedBuilders: FlutterQuillEmbeds.defaultEditorBuilders(),
+                  customStyles: DefaultStyles(
+                    paragraph: DefaultTextBlockStyle(
+                      GoogleFonts.merriweather(
+                        fontSize: 18.0,
+                        color: Colors.black87,
+                        height: 1.8,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      HorizontalSpacing(8.0, 8.0),
+                      VerticalSpacing(0.0, 0.0),
+                      VerticalSpacing(0.0, 0.0),
+                      null,
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: CustomEditorToolbar(onAction: _handleAction),
-    );
-  }
-}
-
-class _MinimalOption extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const _MinimalOption({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.black54),
-            SizedBox(width: 12),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
+      bottomNavigationBar: AnimatedPadding(
+        duration: const Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: CustomEditorToolbar(
+            controller: _controller, onAction: _handleAction),
       ),
     );
   }

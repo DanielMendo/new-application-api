@@ -20,7 +20,7 @@ class SocialAuthButtons extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Or sign in with',
+              'O conectar con',
               style: TextStyle(
                 fontSize: 13,
                 color: Colors.grey.shade600,

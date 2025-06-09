@@ -3,6 +3,10 @@
     "java.configuration.updateBuildConfiguration": "interactive",
     "cSpell.words": [
         "Bloogol",
+        "buildscript",
         "nunito"
+    ],
+    "java.project.sourcePaths": [
+        "build/app/outputs/flutter-apk"
     ]
 }

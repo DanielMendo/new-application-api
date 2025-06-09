@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:new_application_api/screens/auth/login_screen.dart';
+import 'package:go_router/go_router.dart';
 
 class EmailSent extends StatefulWidget {
   const EmailSent({super.key});
@@ -22,8 +22,7 @@ class EmailSentState extends State<EmailSent> {
             IconButton(
               icon: Icon(Icons.close),
               onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()));
+                context.go('/home');
               },
             ),
           ],
@@ -64,10 +63,7 @@ class EmailSentState extends State<EmailSent> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => LoginScreen()));
+                        context.go('/login');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).primaryColor,

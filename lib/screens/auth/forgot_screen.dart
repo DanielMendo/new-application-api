@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:new_application_api/screens/auth/email_sent_screen.dart';
 import 'package:new_application_api/services/auth/auth_service.dart';
 
 class ForgotScreen extends StatefulWidget {
@@ -12,7 +13,6 @@ class ForgotScreen extends StatefulWidget {
 
 class ForgotScreenState extends State<ForgotScreen> {
   final _emailController = TextEditingController();
-
   final _formKey = GlobalKey<FormState>();
 
   void _sendEmail() async {
@@ -29,15 +29,10 @@ class ForgotScreenState extends State<ForgotScreen> {
           await AuthService().sendForgotPassword(_emailController.text.trim());
 
       if (mounted) Navigator.of(context, rootNavigator: true).pop();
-
       if (!mounted) return;
 
       if (response.success) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => EmailSent()),
-          (Route<dynamic> route) => false,
-        );
+        context.go('/email-sent');
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -49,12 +44,13 @@ class ForgotScreenState extends State<ForgotScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Email sent",
+                    Text("Email enviado",
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.bold)),
-                    Text("Email link to reset password sent",
+                    Text(
+                        "Se ha enviado un email con un enlace para restablecer la contraseña",
                         style: TextStyle(color: Colors.white, fontSize: 12))
                   ],
                 ),
@@ -79,7 +75,7 @@ class ForgotScreenState extends State<ForgotScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Invalid Email",
+                    Text("Correo electrónico no válido",
                         style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -112,12 +108,12 @@ class ForgotScreenState extends State<ForgotScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Invalid email",
+                  Text("Correo electrónico no válido",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.bold)),
-                  Text("Please check your email",
+                  Text("Por favor revisa tu correo electrónico",
                       style: TextStyle(color: Colors.white, fontSize: 12))
                 ],
               ),
@@ -136,115 +132,105 @@ class ForgotScreenState extends State<ForgotScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-        appBar: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          leading: IconButton(
-            icon: Icon(Iconsax.arrow_left),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ),
-        body: Container(
-            margin: EdgeInsets.all(24),
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(24),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// --- [Header] --- ///
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  /// AppBar personalizado
+                  Row(
                     children: [
-                      Text(
-                        "Forgot password?",
-                        style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        "Enter details to get started",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey.shade600,
-                        ),
+                      IconButton(
+                        icon: Icon(Iconsax.arrow_left),
+                        onPressed: () {
+                          context.pop();
+                        },
                       ),
                     ],
                   ),
+
+                  /// Header
+                  SizedBox(height: 10),
+                  Text(
+                    "¿Olvidaste tu contraseña?",
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Introduce tus datos para comenzar",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
                   SizedBox(height: 40),
 
-                  /// --- [Form] --- ///
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          // Email
-                          Expanded(
-                            child: TextFormField(
-                              controller: _emailController,
-                              decoration: InputDecoration(
-                                contentPadding:
-                                    EdgeInsets.symmetric(vertical: 20),
-                                prefixIcon: Icon(Iconsax.direct_right,
-                                    color: Colors.grey.shade600, size: 20),
-                                labelText: "Email",
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide:
-                                      BorderSide(color: Colors.grey.shade300),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Email is required';
-                                }
-                                if (!value.contains('@')) {
-                                  return 'Email is invalid';
-                                }
-                                return null;
-                              },
-                            ),
-                          )
-                        ],
+                  /// Form
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 20),
+                      prefixIcon: Icon(Iconsax.direct_right,
+                          color: Colors.grey.shade600, size: 20),
+                      labelText: "Email",
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      SizedBox(height: 20),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide:
+                            BorderSide(color: Theme.of(context).primaryColor),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Correo electrónico es requerido';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Correo electrónico no válido';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
 
-                      // Send Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () => _sendEmail(),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            "Send",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
+                  /// Botón Enviar
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _sendEmail,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                    ],
-                  )
+                      child: Text(
+                        "Enviar",
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            )),
+            ),
+          ),
+        ),
       ),
     );
   }

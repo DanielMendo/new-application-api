@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:new_application_api/services/category_service.dart';
 import 'package:new_application_api/models/category.dart';
@@ -33,7 +34,7 @@ class _SelectCategoriesViewState extends State<SelectCategoriesView> {
         leading: IconButton(
           icon: Icon(Iconsax.arrow_left, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context, selectedCategory);
+            context.pop(selectedCategory);
           },
         ),
       ),
@@ -69,20 +70,7 @@ class _SelectCategoriesViewState extends State<SelectCategoriesView> {
                     'Escoge la categoría que más identifique tu post. Esto será útil para que los lectores encuentren el post más relevante.',
                     style: TextStyle(color: Colors.black87),
                   ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                      hintText: 'Buscar...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
                   const Text(
                     "Categorías disponibles",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -99,7 +87,7 @@ class _SelectCategoriesViewState extends State<SelectCategoriesView> {
                               setState(() {
                                 selectedCategory = cat;
                               });
-                              Navigator.pop(context, selectedCategory);
+                              context.pop(selectedCategory);
                             },
                           ),
                           const Divider(),

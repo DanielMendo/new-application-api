@@ -47,8 +47,9 @@ class CommentInput extends StatelessWidget {
                     controller: controller,
                     decoration: InputDecoration(
                       hintText: 'Escribe un comentario...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       contentPadding:
                           const EdgeInsets.symmetric(horizontal: 16),

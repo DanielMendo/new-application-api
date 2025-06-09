@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:new_application_api/models/post.dart';
 import 'package:new_application_api/screens/layout/card_post.dart';
 import 'package:new_application_api/services/post_service.dart';
 import 'package:new_application_api/utils/user_session.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:new_application_api/services/notification_service.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -14,11 +16,13 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   late Future<List<Post>> _postsFuture;
+  int unreadCount = 0;
 
   @override
   void initState() {
     super.initState();
     _postsFuture = _fetchPosts();
+    _loadUnreadNotifications();
   }
 
   Future<List<Post>> _fetchPosts() async {
@@ -26,9 +30,23 @@ class _HomeViewState extends State<HomeView> {
     return postService.getAllPostsFollowing(UserSession.token!);
   }
 
+  Future<void> _loadUnreadNotifications() async {
+    try {
+      final notificationService = NotificationService();
+      final count =
+          await notificationService.getUnreadCount(UserSession.token!);
+      setState(() {
+        unreadCount = count;
+      });
+    } catch (e) {
+      print("Error al obtener notificaciones no leídas: $e");
+    }
+  }
+
   Future<void> _refreshPosts() async {
     setState(() {
       _postsFuture = _fetchPosts();
+      _loadUnreadNotifications();
     });
   }
 
@@ -36,6 +54,7 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         toolbarHeight: 80,
         backgroundColor: Colors.transparent,
         title: const Text(
@@ -48,8 +67,16 @@ class _HomeViewState extends State<HomeView> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(PhosphorIcons.bell, color: Colors.black, size: 22),
+            onPressed: () async {
+              context.push('/notifications');
+              setState(() {
+                unreadCount = 0;
+              });
+            },
+            icon: Badge.count(
+                count: unreadCount,
+                child: const Icon(PhosphorIcons.bell,
+                    color: Colors.black, size: 22)),
           ),
         ],
       ),

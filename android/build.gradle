@@ -1,25 +1,52 @@
 buildscript {
+    ext {
+        kotlin_version = '2.1.0'
+        compileSdkVersion = 35
+    }
+
     repositories {
         google()  
         mavenCentral() 
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:8.2.1' 
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
+}
+
+plugins {
+    id 'com.google.gms.google-services' version '4.4.2' apply false
 }
 
 allprojects {
     repositories {
-        google()  // Asegúrate de que google() esté presente
-        mavenCentral()  // Y mavenCentral()
+        google() 
+        mavenCentral()  
     }
 
-     subprojects {
+    configurations.all {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'org.bouncycastle' &&
+            details.requested.name == 'bcprov-jdk18on') {
+            details.useVersion '1.76'
+        }
+    }
+}
+
+
+    subprojects {
         afterEvaluate { project ->
             if (project.hasProperty('android')) {
                 project.android {
                     if (namespace == null) {
                         namespace project.group
+                    }
+
+                    compileSdkVersion rootProject.ext.compileSdkVersion
+
+                    lintOptions {
+                        warning 'unchecked'
                     }
                 }
             }
@@ -28,13 +55,11 @@ allprojects {
 }
 
 rootProject.buildDir = "../build"
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
 
-subprojects {
-    project.evaluationDependsOn(":app")
-}
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir

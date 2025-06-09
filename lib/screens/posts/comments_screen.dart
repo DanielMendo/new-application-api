@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:new_application_api/models/comment.dart';
 import 'package:new_application_api/screens/posts/comment_view.dart';
 import 'package:new_application_api/screens/posts/comments_input_view.dart';
 import 'package:new_application_api/services/comment_service.dart';
 import 'package:new_application_api/utils/user_session.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class CommentsScreen extends StatefulWidget {
   final int postId;
@@ -16,7 +18,7 @@ class CommentsScreen extends StatefulWidget {
 
 class _CommentsScreenState extends State<CommentsScreen> {
   late Future<List<Comment>> _commentsFuture;
-  String _selectedOrder = 'most_relevant';
+  String _selectedOrder = 'desc';
   final TextEditingController _controller = TextEditingController();
 
   int? _replyToCommentId;
@@ -33,6 +35,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
       _commentsFuture = CommentService().fetchComments(
         widget.postId,
         UserSession.token!,
+        _selectedOrder,
       );
     });
   }
@@ -78,7 +81,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
           child: CommentItem(
             comment: comment,
             onReply: _replyTo,
-            onDeleted: _loadComments, // <-- Lógica para refrescar
+            onDeleted: _loadComments,
           ),
         ),
       );
@@ -101,21 +104,18 @@ class _CommentsScreenState extends State<CommentsScreen> {
         title: const Text('Comentarios'),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       body: Column(
         children: [
-          // Filtro de orden
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: DropdownButtonFormField<String>(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: DropdownButtonFormField2<String>(
               value: _selectedOrder,
               items: const [
-                DropdownMenuItem(
-                    value: 'most_relevant', child: Text('Most Relevant')),
-                DropdownMenuItem(value: 'newest', child: Text('Newest')),
-                DropdownMenuItem(value: 'oldest', child: Text('Oldest')),
+                DropdownMenuItem(value: 'desc', child: Text('Más nuevo')),
+                DropdownMenuItem(value: 'asc', child: Text('Más viejo')),
               ],
               onChanged: (value) {
                 if (value != null) {
@@ -123,13 +123,29 @@ class _CommentsScreenState extends State<CommentsScreen> {
                   _loadComments();
                 }
               },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                    color: Colors.grey,
+                    width: 1.5,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(
+                    color: Colors.grey,
+                    width: 1.5,
+                  ),
+                ),
               ),
             ),
           ),
+
+          const SizedBox(height: 20),
 
           // Comentarios
           Expanded(

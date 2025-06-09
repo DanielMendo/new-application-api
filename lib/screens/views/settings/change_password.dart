@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:new_application_api/services/auth/auth_service.dart';
 import 'package:new_application_api/utils/user_session.dart';
@@ -44,12 +45,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
         if (response.success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Password changed successfully')),
+            const SnackBar(content: Text('Contraseña actualizada')),
           );
           _currentPasswordController.clear();
           _newPasswordController.clear();
           _confirmPasswordController.clear();
-          Navigator.pop(context);
+          context.pop();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response.message)),
@@ -58,7 +59,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       } catch (e) {
         if (mounted) Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong')),
+          const SnackBar(content: Text('Algo salió mal')),
         );
       }
     }
@@ -113,10 +114,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Change Password'),
+        title: const Text('Cambiar contraseña'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       body: Padding(
@@ -136,7 +137,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the current password';
+                    return 'Por favor introduce la contraseña actual';
                   }
                   return null;
                 },
@@ -153,7 +154,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a new password';
+                    return 'Por favor introduce una nueva contraseña';
                   }
                   return null;
                 },
@@ -170,9 +171,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please confirm the new password';
+                    return 'Por favor confirma la nueva contraseña';
                   } else if (value != _newPasswordController.text) {
-                    return 'Passwords do not match';
+                    return 'Las contraseñas no coinciden';
                   }
                   return null;
                 },

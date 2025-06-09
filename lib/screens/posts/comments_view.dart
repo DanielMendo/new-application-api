@@ -38,7 +38,7 @@ class CommentsView extends StatelessWidget {
           Expanded(
             child: ListView.builder(
               controller: scrollController,
-              itemCount: 10, // Aquí deberías usar tu lista real de comentarios
+              itemCount: 10,
               itemBuilder: (context, index) {
                 return ListTile(
                   leading: const CircleAvatar(

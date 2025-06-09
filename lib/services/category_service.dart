@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/category.dart';
+import 'package:new_application_api/config.dart';
 
 class CategoryService {
   List<Category>? _cachedCategories;
 
-  final String baseUrl = 'https://bloogol.com/api/categories';
+  final String baseUrl = '${AppConfig.baseUrl}/categories';
 
   Future<List<Category>> getCategories() async {
     if (_cachedCategories != null) {

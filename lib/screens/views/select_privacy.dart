@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 
 class SelectPrivacyView extends StatefulWidget {
@@ -28,7 +29,7 @@ class _SelectPrivacyViewState extends State<SelectPrivacyView> {
           leading: IconButton(
             icon: Icon(Iconsax.arrow_left, color: Colors.black),
             onPressed: () {
-              Navigator.pop(context, privacy);
+              context.pop(privacy);
             },
           ),
         ),
@@ -64,7 +65,7 @@ class _SelectPrivacyViewState extends State<SelectPrivacyView> {
                     setState(() {
                       privacy = true;
                     });
-                    Navigator.pop(context, privacy);
+                    context.pop(privacy);
                   },
                 ),
                 Divider(),
@@ -79,7 +80,7 @@ class _SelectPrivacyViewState extends State<SelectPrivacyView> {
                     setState(() {
                       privacy = false;
                     });
-                    Navigator.pop(context, privacy);
+                    context.pop(privacy);
                   },
                 )
               ],

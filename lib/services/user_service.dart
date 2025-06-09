@@ -4,9 +4,10 @@ import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:new_application_api/models/profile.dart';
 import '../models/user.dart';
+import 'package:new_application_api/config.dart';
 
 class UserService {
-  final String baseUrl = 'https://bloogol.com/api';
+  final String baseUrl = '${AppConfig.baseUrl}/users';
 
   Future<List<User>> getUsers() async {
     final response = await http.get(Uri.parse(baseUrl));
@@ -29,7 +30,7 @@ class UserService {
 
   Future<UserProfile> fetchUserProfile(int userId, String token) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/users/$userId/profile'),
+      Uri.parse('$baseUrl/$userId/profile'),
       headers: {
         'Accept': 'application/json',
         'Authorization': 'Bearer $token',
@@ -72,7 +73,7 @@ class UserService {
   }
 
   Future<String> uploadImage(File imageFile, String token) async {
-    final uri = Uri.parse('$baseUrl/users/image/upload');
+    final uri = Uri.parse('$baseUrl/image/upload');
     final request = http.MultipartRequest('POST', uri);
 
     request.files.add(await http.MultipartFile.fromPath(
@@ -97,7 +98,7 @@ class UserService {
 
   Future<void> updateProfile(User user, String token) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/users/${user.id}/profile'),
+      Uri.parse('$baseUrl/${user.id}/profile'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -113,17 +114,19 @@ class UserService {
     }
   }
 
-  // Future<Map<String, dynamic>> fetchFollowStats(
-  //     int userId, String token) async {
-  //   final response = await http.get(
-  //     Uri.parse('https://bloogol.com/api/users/$userId/stats'),
-  //     headers: {'Authorization': 'Bearer $token'},
-  //   );
+  Future<List<User>> searchUsers(String query, String token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/search?query=$query'),
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-  //   if (response.statusCode == 200) {
-  //     return jsonDecode(response.body);
-  //   } else {
-  //     throw Exception('Error al obtener estadísticas');
-  //   }
-  // }
+    if (response.statusCode == 200) {
+      List jsonResponse = json.decode(response.body);
+      return jsonResponse.map((user) => User.fromJson(user)).toList();
+    } else {
+      throw Exception('Ocurrio un error');
+    }
+  }
 }

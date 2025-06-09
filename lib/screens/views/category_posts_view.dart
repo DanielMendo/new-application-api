@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:new_application_api/models/post.dart';
 import 'package:new_application_api/services/post_service.dart';
 import 'package:new_application_api/screens/layout/card_post.dart';
@@ -46,65 +47,77 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 4),
-            child: Text(
-              widget.categoryName,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+      body: FutureBuilder<List<Post>>(
+        future: _postsFuture,
+        builder: (context, snapshot) {
+          return RefreshIndicator(
+            onRefresh: _refreshPosts,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.categoryName,
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              widget.categoryDescription,
+                              style: TextStyle(
+                                  fontSize: 16, color: Colors.grey.shade700),
+                            ),
+                          ],
+                        )),
+                    const SizedBox(height: 20),
+                    const Divider(),
+
+                    // Publicaciones
+                    if (snapshot.connectionState == ConnectionState.waiting)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else if (snapshot.hasError)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 40),
+                        child: Center(child: Text('Error: ${snapshot.error}')),
+                      )
+                    else if (!snapshot.hasData || snapshot.data!.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: Center(child: Text('No hay publicaciones aún.')),
+                      )
+                    else
+                      ...snapshot.data!.map((post) => Column(
+                            children: [
+                              PostPreviewCard(post: post),
+                              Divider(color: Colors.grey.shade300),
+                            ],
+                          )),
+
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
-          ),
-          // Descripción
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-            child: Text(
-              widget.categoryDescription,
-              style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
-            ),
-          ),
-          const Divider(),
-          // Lista de Posts
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refreshPosts,
-              child: FutureBuilder<List<Post>>(
-                future: _postsFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(
-                        child: Text('No hay publicaciones aún.'));
-                  } else {
-                    final posts = snapshot.data!;
-                    return ListView.separated(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      padding: const EdgeInsets.all(10.0),
-                      itemCount: posts.length,
-                      separatorBuilder: (context, index) =>
-                          Divider(color: Colors.grey.shade300),
-                      itemBuilder: (context, index) {
-                        final post = posts[index];
-                        return PostPreviewCard(post: post);
-                      },
-                    );
-                  }
-                },
-              ),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

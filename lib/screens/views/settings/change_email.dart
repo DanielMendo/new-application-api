@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:new_application_api/utils/user_session.dart';
 import 'package:new_application_api/services/auth/auth_service.dart';
@@ -50,7 +51,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Correo actualizado",
+                      Text("Email actualizado",
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -67,7 +68,10 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
               margin: EdgeInsets.all(12),
             ),
           );
-          Navigator.pop(context, UserSession.currentUser);
+
+          if (!mounted) return;
+
+          context.pop(UserSession.currentUser);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response.message)),
@@ -77,7 +81,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
         if (mounted) Navigator.of(context, rootNavigator: true).pop();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error changing email')),
+          SnackBar(content: Text('Error al actualizar el email')),
         );
       }
     }
@@ -94,10 +98,10 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Change Email'),
+        title: const Text('Cambiar email'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       body: Padding(
@@ -107,10 +111,10 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildLabel('Correo actual'),
+              _buildLabel('Email actual'),
               _buildInput(currentEmailController, readOnly: true),
               const SizedBox(height: 24),
-              _buildLabel('Nuevo correo'),
+              _buildLabel('Nuevo Email'),
               _buildInput(_emailController, maxLength: 50, readOnly: false),
               const SizedBox(height: 30),
               SizedBox(

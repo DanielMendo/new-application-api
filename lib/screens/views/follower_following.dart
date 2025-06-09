@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:new_application_api/models/user.dart';
-import 'package:new_application_api/screens/home/home_screen.dart';
 import 'package:new_application_api/screens/views/user_profile_view.dart';
 import 'package:new_application_api/services/follow_service.dart';
 import 'package:new_application_api/utils/user_session.dart';
+import 'package:new_application_api/config.dart';
 
 class FollowersFollowingView extends StatefulWidget {
   final int userId;
@@ -41,7 +42,7 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
   @override
   Widget build(BuildContext context) {
     final title = widget.showFollowers ? 'Seguidores' : 'Seguidos';
-    final baseUrl = 'https://bloogol.com/storage/';
+    final baseUrl = AppConfig.baseStorageUrl;
 
     return Scaffold(
       appBar: AppBar(
@@ -69,24 +70,14 @@ class _FollowersFollowingViewState extends State<FollowersFollowingView> {
               return ListTile(
                 leading: CircleAvatar(
                   backgroundImage: user.profileImage != null
-                      ? NetworkImage('$baseUrl${user.profileImage}')
+                      ? NetworkImage('$baseUrl/${user.profileImage}')
                       : const AssetImage('assets/posts/avatar.png')
                           as ImageProvider,
                 ),
                 title: Text(user.name),
                 subtitle: user.bio != null ? Text(user.bio!) : null,
                 onTap: () {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreen(
-                        customBody: UserProfileView(
-                          user: user,
-                        ),
-                      ),
-                    ),
-                    (Route<dynamic> route) => false,
-                  );
+                  context.go('/profile', extra: UserProfileView(user: user));
                 },
               );
             },

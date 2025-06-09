@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'dart:io';
 import 'package:new_application_api/utils/user_session.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:new_application_api/config.dart';
 import 'package:new_application_api/services/user_service.dart';
 
 class EditProfilePage extends StatefulWidget {
@@ -13,7 +15,7 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  final baseUrl = 'https://bloogol.com/storage/';
+  final baseUrl = AppConfig.baseStorageUrl;
 
   late TextEditingController nameController;
   late TextEditingController lastNameController;
@@ -56,7 +58,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         !hasLastNameChanged &&
         !hasBioChanged &&
         !hasImageChanged) {
-      Navigator.pop(context, false);
+      context.pop(false);
       return;
     }
 
@@ -88,9 +90,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
       await UserSession.setSession(updatedUser, UserSession.token!,
           rememberMe: true);
 
-      Navigator.pop(context);
+      if (!mounted) return;
 
-      Navigator.pop(context, true);
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
+
+      context.pop(true);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -122,7 +126,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ),
       );
     } catch (e) {
-      Navigator.pop(context);
+      if (mounted) Navigator.of(context, rootNavigator: true).pop();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -161,22 +165,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final imageProvider = _tempPickedFile != null
         ? FileImage(File(_tempPickedFile!.path)) as ImageProvider
         : profileImagePath != null
-            ? NetworkImage('$baseUrl$profileImagePath')
+            ? NetworkImage('$baseUrl/$profileImagePath')
             : const AssetImage('assets/posts/avatar.png') as ImageProvider;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit profile"),
+        title: const Text("Editar perfil"),
         leading: IconButton(
           icon: Icon(Iconsax.arrow_left, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context, false);
+            context.pop(false);
           },
         ),
         actions: [
           TextButton(
             onPressed: _saveChanges,
-            child: const Text("Save"),
+            child: const Text("Guardar"),
           ),
         ],
       ),

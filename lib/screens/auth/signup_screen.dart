@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:new_application_api/services/auth/auth_service.dart';
+import 'package:new_application_api/services/notification_service.dart';
 import 'package:new_application_api/utils/user_session.dart';
-import 'package:new_application_api/screens/home/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -19,7 +22,6 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   final _nameController = TextEditingController();
   final _lastNameController = TextEditingController();
-  final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -38,13 +40,14 @@ class SignUpScreenState extends State<SignUpScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("Accept the terms and conditions",
+                      Text(
+                          "Acepta los términos y condiciones antes de continuar",
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.bold)),
                       Text(
-                        "You must accept the terms and conditions before continuing.",
+                        "Debes aceptar los términos y condiciones antes de continuar",
                         style: TextStyle(color: Colors.white, fontSize: 12),
                         softWrap: true,
                         maxLines: 2,
@@ -75,22 +78,19 @@ class SignUpScreenState extends State<SignUpScreen> {
       final registerResponse = await AuthService().register(
           _nameController.text.trim(),
           _lastNameController.text.trim(),
-          _phoneController.text.trim(),
           _emailController.text.trim(),
           _passwordController.text.trim());
 
-      if (mounted) Navigator.of(context, rootNavigator: true).pop();
-
-      if (!mounted) return;
-
       if (registerResponse.token != null) {
-        UserSession.setSession(registerResponse.user!, registerResponse.token!);
+        UserSession.setSession(registerResponse.user!, registerResponse.token!,
+            rememberMe: true);
+      }
 
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-          (Route<dynamic> route) => false,
-        );
+      await _uploadFcmTokenIfAvailable(registerResponse.token!);
+
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        context.go('/home');
       }
     } catch (e) {
       if (mounted) Navigator.of(context, rootNavigator: true).pop();
@@ -105,12 +105,12 @@ class SignUpScreenState extends State<SignUpScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Error creating account",
+                  Text("Error al crear la cuenta",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.bold)),
-                  Text("Please check your information",
+                  Text("Por favor revisa tu información",
                       style: TextStyle(color: Colors.white, fontSize: 12))
                 ],
               ),
@@ -127,21 +127,32 @@ class SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
+  Future<void> _uploadFcmTokenIfAvailable(String authToken) async {
+    final prefs = await SharedPreferences.getInstance();
+    final fcmToken = prefs.getString('fcm_token');
+
+    if (fcmToken != null) {
+      await NotificationService().uploadDeviceToken(authToken, fcmToken);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark,
       child: Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            backgroundColor: Colors.transparent,
-            leading: IconButton(
-              icon: Icon(Iconsax.arrow_left),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Iconsax.arrow_left),
+            onPressed: () {
+              context.pop();
+            },
           ),
-          body: SingleChildScrollView(
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
             child: Container(
               margin: EdgeInsets.all(24),
               child: Form(
@@ -149,19 +160,19 @@ class SignUpScreenState extends State<SignUpScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    /// --- [Header] --- ///
+                    /// Header
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Create account",
+                          "Registrarse",
                           style: TextStyle(
                             fontSize: 25,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          "Enter details to get started",
+                          "Introduce tus datos para comenzar",
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey.shade600,
@@ -171,13 +182,12 @@ class SignUpScreenState extends State<SignUpScreen> {
                     ),
                     SizedBox(height: 40),
 
-                    /// --- [Form] --- ///
+                    /// Form
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
-                            // First Name
                             Expanded(
                               child: TextFormField(
                                 controller: _nameController,
@@ -186,7 +196,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                                       EdgeInsets.symmetric(vertical: 20),
                                   prefixIcon: Icon(Iconsax.user,
                                       color: Colors.grey.shade600, size: 20),
-                                  labelText: "First Name",
+                                  labelText: "Nombre",
                                   enabledBorder: OutlineInputBorder(
                                     borderSide:
                                         BorderSide(color: Colors.grey.shade300),
@@ -200,15 +210,13 @@ class SignUpScreenState extends State<SignUpScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'First name is required';
+                                    return 'Nombre es requerido';
                                   }
                                   return null;
                                 },
                               ),
                             ),
                             SizedBox(width: 10),
-
-                            // Last Name
                             Expanded(
                               child: TextFormField(
                                 controller: _lastNameController,
@@ -217,7 +225,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                                       EdgeInsets.symmetric(vertical: 20),
                                   prefixIcon: Icon(Iconsax.user,
                                       color: Colors.grey.shade600, size: 20),
-                                  labelText: "Last Name",
+                                  labelText: "Apellido",
                                   enabledBorder: OutlineInputBorder(
                                     borderSide:
                                         BorderSide(color: Colors.grey.shade300),
@@ -231,7 +239,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return 'Last name is required';
+                                    return 'Apellido es requerido';
                                   }
                                   return null;
                                 },
@@ -240,8 +248,6 @@ class SignUpScreenState extends State<SignUpScreen> {
                           ],
                         ),
                         SizedBox(height: 15),
-
-                        // Email
                         TextFormField(
                           controller: _emailController,
                           decoration: InputDecoration(
@@ -263,104 +269,69 @@ class SignUpScreenState extends State<SignUpScreen> {
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Email is required';
+                              return 'Email es requerido';
                             }
                             if (!value.contains('@')) {
-                              return 'Email is invalid';
+                              return 'Email no válido';
                             }
                             return null;
                           },
                         ),
                         SizedBox(height: 15),
-
-                        // Password
                         TextFormField(
-                            controller: _passwordController,
-                            obscureText: isPasswordHidden,
-                            decoration: InputDecoration(
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 20),
-                              prefixIcon: Icon(Iconsax.lock,
-                                  color: Colors.grey.shade600, size: 20),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  isPasswordHidden
-                                      ? Iconsax.eye
-                                      : Iconsax.eye_slash,
-                                  color: Colors.grey.shade600,
-                                  size: 20,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    isPasswordHidden = !isPasswordHidden;
-                                  });
-                                },
+                          controller: _passwordController,
+                          obscureText: isPasswordHidden,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.symmetric(vertical: 20),
+                            prefixIcon: Icon(Iconsax.lock,
+                                color: Colors.grey.shade600, size: 20),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                isPasswordHidden
+                                    ? Iconsax.eye
+                                    : Iconsax.eye_slash,
+                                color: Colors.grey.shade600,
+                                size: 20,
                               ),
-                              labelText: "Password",
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Theme.of(context).primaryColor),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                              onPressed: () {
+                                setState(() {
+                                  isPasswordHidden = !isPasswordHidden;
+                                });
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Please enter a password";
-                              }
-                              if (value.length < 6) {
-                                return "Password must be at least 6 characters";
-                              }
-                              return null;
-                            }),
-                        SizedBox(height: 15),
-
-                        // Phone
-                        TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            decoration: InputDecoration(
-                              contentPadding:
-                                  EdgeInsets.symmetric(vertical: 20),
-                              prefixIcon: Icon(Iconsax.call,
-                                  color: Colors.grey.shade600, size: 20),
-                              labelText: "Phone",
-                              enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.grey.shade300),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Theme.of(context).primaryColor),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
+                            labelText: "Contraseña",
+                            enabledBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Please enter a phone number";
-                              }
-                              if (value.length > 10) {
-                                return "Phone number only accepts 10 digits";
-                              }
-                              return null;
-                            }),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Theme.of(context).primaryColor),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Por favor introduce una contraseña";
+                            }
+                            if (value.length < 6) {
+                              return "La contraseña debe tener al menos 6 caracteres";
+                            }
+                            return null;
+                          },
+                        ),
                         SizedBox(height: 15),
-
-                        // Terms & Conditions
                         Row(
                           children: [
                             Checkbox(
-                                value: isChecking,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isChecking = value!;
-                                  });
-                                }),
+                              value: isChecking,
+                              onChanged: (value) {
+                                setState(() {
+                                  isChecking = value!;
+                                });
+                              },
+                            ),
                             RichText(
                               text: TextSpan(
                                 style: TextStyle(
@@ -368,9 +339,9 @@ class SignUpScreenState extends State<SignUpScreen> {
                                   fontSize: 16,
                                 ),
                                 children: [
-                                  TextSpan(text: "I agree to the "),
+                                  TextSpan(text: "Acepto los "),
                                   TextSpan(
-                                    text: "Terms and Conditions",
+                                    text: "Términos y condiciones",
                                     style: TextStyle(
                                         color: Theme.of(context).primaryColor,
                                         decoration: TextDecoration.underline),
@@ -381,8 +352,6 @@ class SignUpScreenState extends State<SignUpScreen> {
                           ],
                         ),
                         SizedBox(height: 40),
-
-                        // Sign up button
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -390,13 +359,13 @@ class SignUpScreenState extends State<SignUpScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).primaryColor,
                               foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 20),
+                              padding: EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                             child: Text(
-                              "Sign Up",
+                              "Registrarse",
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
@@ -408,7 +377,9 @@ class SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

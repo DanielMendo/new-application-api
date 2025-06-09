@@ -2,10 +2,11 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:new_application_api/models/login_response.dart';
+import 'package:new_application_api/config.dart';
 
 class FbAuthService {
   Future<LoginResponse> signInWithFb() async {
-    final String baseUrl = 'https://bloogol.com/api';
+    final String baseUrl = AppConfig.baseUrl;
 
     final LoginResult result = await FacebookAuth.instance.login();
 

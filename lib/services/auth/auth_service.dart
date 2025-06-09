@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../models/login_response.dart';
 import '../../models/api_response.dart';
+import 'package:new_application_api/config.dart';
 
 class AuthService {
-  final String baseUrl = 'https://bloogol.com/api';
+  final String baseUrl = AppConfig.baseUrl;
 
   // Login
   Future<LoginResponse> login(String email, String password) async {
@@ -21,14 +22,13 @@ class AuthService {
   }
 
   // Register
-  Future<LoginResponse> register(String name, String lastName, String phone,
-      String email, String password) async {
+  Future<LoginResponse> register(
+      String name, String lastName, String email, String password) async {
     final response = await http.post(Uri.parse('$baseUrl/register'),
         headers: {'Content-Type': 'application/json; charset=UTF-8'},
         body: jsonEncode({
           'name': name,
           'last_name': lastName,
-          'phone': phone,
           'email': email,
           'password': password
         }));

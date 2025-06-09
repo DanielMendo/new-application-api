@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:new_application_api/models/post.dart';
-import 'package:new_application_api/screens/posts/post_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:new_application_api/config.dart';
 
 class PostPreviewCard extends StatelessWidget {
   final Post post;
@@ -14,24 +15,19 @@ class PostPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final baseUrl = 'https://bloogol.com/storage/';
+    final baseUrl = AppConfig.baseStorageUrl;
 
     final profileImage = post.user.profileImage != null
-        ? '$baseUrl${post.user.profileImage}'
+        ? '$baseUrl/${post.user.profileImage}'
         : null;
 
     final formattedDate = post.createdAt.isNotEmpty
-        ? timeago.format(DateTime.parse(post.createdAt))
+        ? timeago.format(DateTime.parse(post.createdAt), locale: 'es')
         : 'Unknown';
 
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => PostDetailScreen(postId: post.id),
-          ),
-        );
+        context.push('/post/${post.id}');
       },
       child: Padding(
         padding: const EdgeInsets.all(16.0),

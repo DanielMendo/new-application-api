@@ -3,7 +3,6 @@ import 'package:new_application_api/models/post.dart';
 import 'package:new_application_api/screens/layout/card_post.dart';
 import 'package:new_application_api/services/post_service.dart';
 import 'package:new_application_api/utils/user_session.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class BookmarksView extends StatefulWidget {
   const BookmarksView({super.key});
@@ -36,22 +35,17 @@ class _BookmarksViewState extends State<BookmarksView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         toolbarHeight: 80,
         backgroundColor: Colors.transparent,
         title: const Text(
-          "Bookmarks",
+          "Marcadores",
           style: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 22,
           ),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(PhosphorIcons.bell, color: Colors.black, size: 22),
-          ),
-        ],
       ),
       body: Container(
         margin: const EdgeInsets.all(5),
@@ -61,7 +55,7 @@ class _BookmarksViewState extends State<BookmarksView> {
             const Padding(
               padding: EdgeInsets.only(left: 10),
               child: Text(
-                "Your library",
+                "Tu librería",
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.black,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:new_application_api/screens/auth/login_screen.dart';
 import 'package:new_application_api/services/auth/auth_service.dart';
 import 'package:new_application_api/utils/user_session.dart';
 
@@ -147,8 +147,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         );
 
         if (mounted) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (context) => LoginScreen()));
+          context.go('/login');
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -170,7 +169,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         title: const Text('Eliminar cuenta'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
       ),
       body: Padding(

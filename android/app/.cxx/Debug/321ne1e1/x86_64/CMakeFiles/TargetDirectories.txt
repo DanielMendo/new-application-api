@@ -1,0 +1,2 @@
+D:/Escritorio/new_application_api/android/app/.cxx/Debug/321ne1e1/x86_64/CMakeFiles/edit_cache.dir
+D:/Escritorio/new_application_api/android/app/.cxx/Debug/321ne1e1/x86_64/CMakeFiles/rebuild_cache.dir

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:new_application_api/screens/views/create_post_view.dart';
-import 'package:new_application_api/screens/views/search_view.dart';
+import 'package:go_router/go_router.dart';
+import 'package:new_application_api/screens/views/explorer_view.dart';
 import 'package:new_application_api/screens/views/home_view.dart';
 import 'package:new_application_api/screens/views/bookmarks_view.dart';
 import 'package:new_application_api/screens/views/user_profile_view.dart';
 import 'package:new_application_api/utils/user_session.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:new_application_api/config.dart';
 
 class HomeScreen extends StatefulWidget {
   final int? initialTab;
@@ -28,7 +29,7 @@ class HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     const HomeView(),
-    const SearchView(),
+    const ExplorerView(),
     const BookmarksView(),
     UserProfileView(user: UserSession.currentUser!, itsMe: true),
   ];
@@ -40,10 +41,10 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   ImageProvider _getProfileImage() {
-    final baseUrl = 'https://bloogol.com/storage/';
+    final baseUrl = AppConfig.baseStorageUrl;
     final profileImage = UserSession.currentUser?.profileImage;
     if (profileImage != null && profileImage.isNotEmpty) {
-      return NetworkImage('$baseUrl$profileImage');
+      return NetworkImage('$baseUrl/$profileImage');
     }
     return const AssetImage('assets/posts/avatar.png');
   }
@@ -76,10 +77,7 @@ class HomeScreenState extends State<HomeScreen> {
     setState(() {
       customBody = null;
       if (index == 2) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const CreatePostView()),
-        );
+        context.push('/create-post');
       } else {
         _selectedIndex = index > 2 ? index - 1 : index;
       }
